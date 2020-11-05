@@ -1,11 +1,19 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:youtube_bloc/api/apiYoutube.dart';
 import 'package:youtube_bloc/model/video.dart';
 
 class DataSearch extends SearchDelegate<String>{
+  bool isShowingResults = false;
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    // TODO: implement appBarTheme
+    return ThemeData.dark();
+  }
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -13,10 +21,23 @@ class DataSearch extends SearchDelegate<String>{
         query = '';
       }):IconButton(icon: Icon(Icons.mic_none), onPressed: (){
       }),
-      IconButton(icon: Icon(Icons.cast), onPressed: (){
+      isShowingResults?IconButton(icon: Icon(Icons.cast), onPressed: (){
 
-      }),
-
+      }):SizedBox(),
+      Padding(
+        padding: const EdgeInsets.only(right: 16,left: 8),
+        child: InkWell(
+          onTap: (){
+          },
+          child: Transform.rotate(
+            angle: 90 * pi/180,
+            child: Container(
+              height: MediaQuery.of(context).size.height *0.01,
+                width: MediaQuery.of(context).size.width *0.05,
+                child: SvgPicture.asset('assets/images/filter.svg',color: Colors.white,)),
+          ),
+        ),
+      ),
     ];
   }
 
@@ -33,6 +54,7 @@ class DataSearch extends SearchDelegate<String>{
 
   @override
   Widget buildResults(BuildContext context) {
+    isShowingResults = true;
     showResults(context);
    return FutureBuilder(
      future: Api().search(query),
