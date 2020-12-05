@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:youtube_bloc/model/channel.dart';
+
 List<Video> videoFromJson(String str) => List<Video>.from(json.decode(str).map((x) => Video.fromJson(x)));
 
 String videoToJson(List<Video> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
@@ -14,13 +16,14 @@ class Video {
     this.etag,
     this.id,
     this.snippet,
+    this.channel,
   });
 
   String kind;
   String etag;
   Id id;
   Snippet snippet;
-
+  Channel channel;
   factory Video.fromJson(Map<String, dynamic> json) => Video(
     kind: json["kind"] == null ? null : json["kind"],
     etag: json["etag"] == null ? null : json["etag"],

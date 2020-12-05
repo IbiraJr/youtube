@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import 'package:youtube_bloc/api/apiYoutube.dart';
-import 'package:youtube_bloc/model/video.dart';
-
+import 'package:provider/provider.dart';
+import 'package:youtube_bloc/view/home/home_view_model.dart';
 class DataSearch extends SearchDelegate<String> {
   bool isShowingResults = false;
+
   @override
   ThemeData appBarTheme(BuildContext context) {
     // TODO: implement appBarTheme
@@ -62,61 +61,62 @@ class DataSearch extends SearchDelegate<String> {
   Widget buildResults(BuildContext context) {
     showResults(context);
     isShowingResults = true;
-    return FutureBuilder(
-      future: Api().search(query),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Video> videos = snapshot.data;
-          return ListView.builder(
-            itemCount: videos.length,
-            itemBuilder: (context, index) {
-              print(videos[index].snippet.channelId);
-              return Container(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  children: [
-                    Container(
-                      child: Image.network(
-                          videos[index].snippet.thumbnails.high.url),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(8.0,8.0,0.0,8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  videos[index].snippet.title,
-                                  style: TextStyle(fontSize: 10),
-                                ),
-                                Text(
-                                  videos[index].snippet.channelTitle,
-                                  style: TextStyle(fontSize: 8),
-                                )
-                              ],
+    return Consumer<HomeViewModel>(
+    builder: (context, homeViewModel, child){
+      return  FutureBuilder(
+        future:homeViewModel.getVideosFromSearch(query) ,
+        builder:(context, snapshot) {
+          if(snapshot.hasData){
+            print(homeViewModel.videos.first.snippet.channelId);
+            return ListView.builder(
+              itemCount: homeViewModel.videos.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: [
+                      Container(
+                        child: Image.network(
+                            homeViewModel.videos[index].snippet.thumbnails.high.url),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(8.0,8.0,0.0,8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    homeViewModel.videos[index].snippet.title,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  Text(
+                                    homeViewModel.videos[index].snippet.channelTitle,
+                                    style: TextStyle(fontSize: 10),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(icon: Icon(Icons.more_vert), onPressed: (){
-                          }),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              );
-            },
-          );
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(icon: Icon(Icons.more_vert), onPressed: (){
+                            }),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+          }else{
+            return Center(child: CircularProgressIndicator(),);
+          }
         }
-      },
+      );
+    }
     );
   }
 
